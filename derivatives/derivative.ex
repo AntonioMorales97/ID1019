@@ -55,6 +55,18 @@ defmodule Derivative do
         IO.write("\n")
     end
 
+    def test_all() do
+        test = {:add, {:add, {:sin, {:add, {:exp, {:var, :x}, {:const, 2}}, {:var, :x}}}, {:div, {:const, 1}, {:ln, {:var, :x}}}}, {:sqroot, {:var, :x}}}
+        der = deriv(test, :x)
+        simple = simplify(der)
+        printp(test)
+        IO.write("\n")
+        printp(der)
+        IO.write("\n")
+        printp(simple)
+        IO.write("\n")
+    end
+
     def deriv({:const, _}, _) do {:const, 0} end
     def deriv({:var, v}, v) do {:const, 1} end
     def deriv({:var, y}, _) do {:var, y} end
@@ -63,6 +75,9 @@ defmodule Derivative do
     end
     def deriv({:exp, {:var, v}, {:const, c}}, v) do
         {:mul, {:const, c}, {:exp, {:var, v}, {:const, c - 1}}}
+    end
+    def deriv({:exp, e1, {:const, c}}, v) do
+        {:mul, {:mul, {:const, c}, {:exp, e1, {:const, c - 1}}}, deriv(e1, v)}
     end
     def deriv({:add, e1, e2}, v) do
         {:add, deriv(e1, v), deriv(e2, v)}
@@ -76,18 +91,25 @@ defmodule Derivative do
     def deriv({:ln, e1}, v) do
         {:div, deriv(e1, v), e1}
     end
-    def deriv({:div, {:const, c1}, {:exp, {:var, v}, {:const, c2}}}, v) do
-        deriv({:mul, {:const, c1}, {:exp, {:var, v}, {:const, -c2}}}, v)
+    def deriv({:div, e1, e2}, v) do
+        {:div, {:add, {:mul, deriv(e1, v), e2}, {:mul, {:const, -1}, {:mul, e1, deriv(e2, v)}}}, {:exp, e2, {:const, 2}}}
     end
-    def deriv({:div, {:const, c}, e1}, v) do
-        deriv({:mul, {:const, c}, {:exp, e1, {:const, -1}}}, v)
+    def deriv({:sqroot, e1}, v) do
+        deriv({:exp, e1, {:const, 1/2}}, v)
     end
 
     def simplify({:const, c}) do {:const, c} end
     def simplify({:var, c}) do {:var, c} end
+    def simplify({:ln, e1}) do {:ln, simplify(e1)} end
     def simplify({:exp, e1, {:const, c}}) when c < 0 do
         toggle = -1 * c
         simplify({:div, {:const, 1}, {:exp, e1, {:const, toggle}}})
+    end
+    def simplify({:exp, e1, {:const, c}}) when c == 1/2 do
+        simplify({:sqroot, e1})
+    end
+    def simplify({:exp, {:sqroot, e1}, {:const, 2}}) do
+        simplify(e1)
     end
     def simplify({:exp, e1, e2}) do
         case simplify(e2) do
@@ -167,14 +189,31 @@ defmodule Derivative do
             {:const, 0} ->
                 {:const, 0}
             s1 ->
-                {:div, s1, e2}
+                case simplify(e2) do
+                    {:const, 0} ->
+                        raise "Division by 0"
+                    s2 ->
+                        {:div, s1, s2}
+                end
+        end
+    end
+    def simplify({:sqroot, e1}) do
+        case simplify(e1) do
+            {:const, 0} ->
+                {:const, 0}
+            {:const, 1} ->
+                {:const, 1}
+            s1 ->
+                {:sqroot, s1}
         end
     end
 
     def printp({:const, c}) do IO.write("#{c}") end
     def printp({:var, v}) do IO.write("#{v}") end
     def printp({:exp, e1, e2}) do
+        IO.write("(")
         printp(e1)
+        IO.write(")")
         IO.write("^")
         printp(e2)
     end
@@ -208,6 +247,11 @@ defmodule Derivative do
         printp(e1)
         IO.write(")/(")
         printp(e2)
+        IO.write(")")
+    end
+    def printp({:sqroot, e1}) do
+        IO.write("sqroot(")
+        printp(e1)
         IO.write(")")
     end
 
