@@ -63,8 +63,21 @@ defmodule Huffman do
     end
 
     #Create the encoding table
+    #The encoding table is sorted by the shortest path...why not?
     def encode_table(tree) do
-        codes(tree, [], [])
+        encoded = codes(tree, [], [])
+        unsorted_encoded = add_path_length(encoded, [])
+        Enum.sort(unsorted_encoded, fn({_, _, x}, {_, _, y}) -> x < y end)
+    end
+
+    def add_path_length([], acc) do acc end
+    def add_path_length([{char, path} = t | rest], acc) do
+        add_path_length(rest, [{char, path, path_length(t)} | acc])
+    end
+
+    def path_length({_, []}) do 0 end
+    def path_length({_, [_head | tail]}) do
+        1 + path_length({:foo, tail})
     end
 
     #Save path for each leaf
@@ -82,7 +95,7 @@ defmodule Huffman do
     #Encode with the given encoding table
     def encode([], _) do [] end
     def encode([char | rest], table) do
-        {_, code} = List.keyfind(table, char, 0)
+        {_, code, _} = List.keyfind(table, char, 0)
         code ++ encode(rest, table)
     end
 
