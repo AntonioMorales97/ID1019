@@ -11,8 +11,8 @@ defmodule Morse do
   end
 
   ## Fill in the empty ... spaces
-  #long = - = vänster
-  #short = . = höger
+  #long = - = left
+  #short = . = right
   def decode([], _, _) do  []  end
   def decode([?- | next], {:node, _, left, _}, table) do
     decode(next, left, table)
