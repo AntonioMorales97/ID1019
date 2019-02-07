@@ -1,5 +1,8 @@
+#Meta-interpreter
 defmodule Eager do
+    #evaluate atoms
     def eval_expr({:atm, id}, _, _) do {:ok, id} end
+    #evaluate variables
     def eval_expr({:var, id}, env, _) do
         case Env.lookup(id, env) do
             nil ->
@@ -8,6 +11,7 @@ defmodule Eager do
                 {:ok, str}
         end
     end
+    #evaluate compound expression
     def eval_expr({:cons, a, b}, env, prog) do
       case eval_expr(a, env, prog) do
         :error ->
@@ -21,6 +25,7 @@ defmodule Eager do
           end
       end
     end
+    #evaluate case expression
     def eval_expr({:case, expr, cls}, env, prog) do
         case eval_expr(expr, env, prog) do
             :error ->
@@ -29,6 +34,7 @@ defmodule Eager do
                 eval_clause(cls, str, env, prog)
         end
     end
+    #evaluate expression
     def eval_expr({:lambda, par, free, seq}, env, _) do
       case Env.closure(free, env) do
         :error ->
@@ -37,6 +43,7 @@ defmodule Eager do
           {:ok, {:closure, par, seq, closure}}
       end
     end
+    #evaluate expression and then evaluate the arguments for the closure
     def eval_expr({:apply, expr, args}, env, prog) do
       case eval_expr(expr, env, prog) do
         :error ->
@@ -51,6 +58,7 @@ defmodule Eager do
           end
       end
     end
+    #handle named functions
     def eval_expr({:call, id, args}, env, prg) when is_atom(id) do
       case List.keyfind(prg, id, 0) do
         nil ->
@@ -66,7 +74,7 @@ defmodule Eager do
           end
       end
     end
-
+    #evaluate arguments
     def eval_args(args, env, prog) do
         #must be in right order...
         Enum.reverse(eval_args(args, [], env, prog))
@@ -80,7 +88,7 @@ defmodule Eager do
                 eval_args(tail, [str | acc], env, prog)
         end
     end
-
+    #evaluate clauses
     def eval_clause([], _, _, _) do :error end
     def eval_clause([{:clause, pattern, sequence} | rest], str, env, prog) do
         vars = extract_vars(pattern)
@@ -92,7 +100,7 @@ defmodule Eager do
                 eval_seq(sequence, env, prog)
         end
     end
-
+    #pattern matching expressions
     def eval_match(:ignore, _, env) do
       {:ok, env}
     end
@@ -120,7 +128,7 @@ defmodule Eager do
     def eval_match(_, _, _) do
         :fail
     end
-
+    #evaluate sequence
     def eval_seq([exp], env, prog) do
       eval_expr(exp, env, prog)
     end
@@ -140,11 +148,11 @@ defmodule Eager do
           end
       end
     end
-
+    #evaluate sequence and program
     def eval(seq, prog) do
         eval_seq(seq, Env.new(), prog)
     end
-
+    #extract variables from environment
     def extract_vars(p) do extract_vars(p, []) end
     def extract_vars({:atm, _}, vars) do vars end
     def extract_vars(:ignore, vars) do vars end

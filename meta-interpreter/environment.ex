@@ -1,18 +1,19 @@
+#Environment functions
 defmodule Env do
     def new() do
         []
     end
 
-    def add(id, str, env) do
-        [{id, str} | env]
+    #def add(id, str, env) do
+    #    [{id, str} | env]
+    #end
+    def add(id, str, []) do [{id, str}] end
+    def add(id, str, [{id, _oldstr} | rest]) do
+        [{id, str} | rest]
     end
-    #def add(id, str, []) do [{id, str}] end
-    #def add(id, str, [{id, _oldstr} | rest]) do
-    #    [{id, str} | rest]
-    #end
-    #def add(id, str, [head | rest] ) do
-    #    [head | add(id, str, rest)]
-    #end
+    def add(id, str, [head | rest] ) do
+        [head | add(id, str, rest)]
+    end
 
     def lookup(_id, []) do nil end
     def lookup(id, [{id, str} | _]) do
