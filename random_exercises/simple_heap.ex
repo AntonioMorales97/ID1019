@@ -39,6 +39,21 @@ defmodule Heap do
     end
 
     def repair({:heap, a, nil, nil}) do {:heap, a, nil, nil} end
+    def repair({:heap, a, {:heap, n1, l1, r1} = h1, {:heap, n2, l2, r2} = h2}) when a < n1 do
+        cond do
+            a < n2 ->
+                cond do
+                    n1 < n2 ->
+                        {:heap, n2, repair({:heap, a, l2, r2}), h1}
+                    n2 < n1 ->
+                        {:heap, n1, repair({:heap, a, l1, r1}), h2}
+                    true ->
+                        {:heap, n1, repair({:heap, a, l1, r1}), h2}
+                end
+            true ->
+                {:heap, n1, repair({:heap, a, l1, r1}), h2}        
+        end
+    end
     def repair({:heap, a, {:heap, node, left, right}, r}) when a < node do
         {:heap, node, repair({:heap, a, left, right}), r}
     end
