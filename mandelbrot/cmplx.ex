@@ -9,10 +9,10 @@ defmodule Cmplx do
     end
 
     def sqr({:cmplx, a, b}) do
-        {:cmplx, (r * r) - (i * i), 2 * r * i}
+        {:cmplx, (a * a) - (b * b), 2 * a * b}
     end
 
-    def abs({:cmplx}, a, b) do
+    def abs({:cmplx, a, b}) do
         :math.sqrt((a * a) + (b * b))
     end
 
