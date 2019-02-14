@@ -1,7 +1,7 @@
 defmodule Color do
     def convert(depth, max) do
-        red(depth, max)
-        #long_rainbow(depth, max)
+        #red(depth, max)
+        long_rainbow(depth, max)
     end
 
     def red(depth, max) do
