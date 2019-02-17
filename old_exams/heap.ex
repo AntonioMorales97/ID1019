@@ -45,9 +45,4 @@ defmodule Heap do
 
     def heap_size(nil) do 0 end
     def heap_size({:node, _, size, _, _}) do size end
-
-    def decrement_size(nil) do :error end
-    def decrement_size({:node, v, s, lh, rh}) do
-        {:node, v, s - 1, lh, rh}
-    end
 end
