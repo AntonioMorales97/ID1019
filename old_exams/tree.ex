@@ -42,6 +42,9 @@ defmodule Tree do
     def rightmost({:node, a, l, {:node, v, nil, nil}}) do
         {{:node, a, l, nil}, v}
     end
+    def rightmost({:node, a, l, {:node, v, l1, nil}}) do
+        {{:node, a, l, l1}, v}
+    end
     def rightmost({:node, v, l, r}) do
         {rest, max} = rightmost(r)
         {{:node, v, l, rest}, max}
