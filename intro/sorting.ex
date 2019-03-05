@@ -1,4 +1,28 @@
 defmodule Sorting do
+    #Selection sort
+    def sort(l) do
+        reversed = selection(l, [])
+        reverse(reversed, [])
+    end
+    def selection([], acc) do acc end
+    def selection([h | t], acc) do
+        min = smin(h, t)
+        selection(delete(min, [h | t]), [min | acc])
+    end
+
+    def smin(min, []) do min end
+    def smin(min, [h | t]) when h < min do
+        smin(h, t)
+    end
+    def smin(min, [_ | t]) do smin(min, t) end
+
+    def delete(_, []) do [] end
+    def delete(m, [m | t]) do t end
+    def delete(m, [h | t]) do [h | delete(m, t)] end
+
+    def reverse([], rev) do rev end
+    def reverse([h | t], rev) do reverse(t, [h | rev]) end
+
     #Insertion sort#
     def isort(l) do isort(l, []) end
     def isort([], sorted) do sorted end
